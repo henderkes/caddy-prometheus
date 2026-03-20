@@ -1,0 +1,110 @@
+{
+  "uid": "frankenphp-runtime",
+  "title": "FrankenPHP / Go Runtime",
+  "tags": ["frankenphp", "caddy", "go"],
+  "editable": true,
+  "schemaVersion": 39,
+  "refresh": "10s",
+  "time": {"from": "now-30m", "to": "now"},
+  "panels": [
+    {
+      "title": "Goroutines",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "datasource": "Prometheus",
+      "targets": [{"expr": "go_goroutines{job=\"caddy_admin\"}", "legendFormat": "goroutines"}],
+      "fieldConfig": {"defaults": {"unit": "short", "color": {"mode": "fixed", "fixedColor": "blue"}}}
+    },
+    {
+      "title": "OS Threads",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "datasource": "Prometheus",
+      "targets": [{"expr": "go_threads{job=\"caddy_admin\"}", "legendFormat": "threads"}],
+      "fieldConfig": {"defaults": {"unit": "short", "color": {"mode": "fixed", "fixedColor": "orange"}}}
+    },
+    {
+      "title": "Process Info",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "go_sched_gomaxprocs_threads{job=\"caddy_admin\"}", "legendFormat": "GOMAXPROCS"},
+        {"expr": "process_open_fds{job=\"caddy_admin\"}", "legendFormat": "Open FDs"},
+        {"expr": "go_memstats_heap_objects{job=\"caddy_admin\"}", "legendFormat": "Heap Objects"}
+      ],
+      "options": {"graphMode": "none", "textMode": "value_and_name"},
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "title": "Heap Memory",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "go_memstats_heap_alloc_bytes{job=\"caddy_admin\"}", "legendFormat": "alloc"},
+        {"expr": "go_memstats_heap_sys_bytes{job=\"caddy_admin\"}", "legendFormat": "sys"},
+        {"expr": "go_memstats_heap_inuse_bytes{job=\"caddy_admin\"}", "legendFormat": "in-use"},
+        {"expr": "go_memstats_heap_idle_bytes{job=\"caddy_admin\"}", "legendFormat": "idle"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": [
+        {"matcher": {"id": "byName", "options": "sys"}, "properties": [{"id": "custom.lineStyle", "value": {"fill": "dash"}}]}
+      ]}
+    },
+    {
+      "title": "RSS / Virtual Memory",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "process_resident_memory_bytes{job=\"caddy_admin\"}", "legendFormat": "RSS"},
+        {"expr": "process_virtual_memory_bytes{job=\"caddy_admin\"}", "legendFormat": "Virtual"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "title": "GC Pause Duration",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "go_gc_duration_seconds{job=\"caddy_admin\",quantile=\"0.5\"}", "legendFormat": "p50"},
+        {"expr": "go_gc_duration_seconds{job=\"caddy_admin\",quantile=\"0.75\"}", "legendFormat": "p75"},
+        {"expr": "go_gc_duration_seconds{job=\"caddy_admin\",quantile=\"1\"}", "legendFormat": "max"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "rate(process_cpu_seconds_total{job=\"caddy_admin\"}[1m])", "legendFormat": "CPU cores"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0}}
+    },
+    {
+      "title": "Allocation Rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "rate(go_memstats_alloc_bytes_total{job=\"caddy_admin\"}[1m])", "legendFormat": "alloc bytes/s"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "Bps"}}
+    },
+    {
+      "title": "Caddy Config Reload",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "datasource": "Prometheus",
+      "targets": [
+        {"expr": "caddy_config_last_reload_successful{job=\"caddy_admin\"}", "legendFormat": "Last reload"}
+      ],
+      "fieldConfig": {"defaults": {"mappings": [
+        {"type": "value", "options": {"0": {"text": "FAILED", "color": "red"}, "1": {"text": "OK", "color": "green"}}}
+      ]}}
+    }
+  ]
+}

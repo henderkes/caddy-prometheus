@@ -1,0 +1,32 @@
+{
+	admin :2019
+
+	servers {
+		metrics
+	}
+
+	frankenphp
+
+	prometheus {
+		data_dir /data/prometheus
+		listen :9090
+		retention 7d
+		wal_compression
+		auto_scrape
+
+		global {
+			scrape_interval 5s
+			scrape_timeout 5s
+			evaluation_interval 15s
+		}
+	}
+}
+
+:80 {
+	route_metrics {
+		metrics_path /metrics
+		allowed_ips private_ranges
+	}
+
+	respond "ok" 200
+}

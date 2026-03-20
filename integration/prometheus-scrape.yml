@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s
+  scrape_timeout: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: caddy_admin
+    static_configs:
+      - targets: ["localhost:2019"]
