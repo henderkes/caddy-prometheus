@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/alecthomas/units"
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 	"github.com/prometheus/client_golang/prometheus"
@@ -88,8 +89,18 @@ func (a *App) Start() error {
 
 	tsdbOpts := tsdb.DefaultOptions()
 	tsdbOpts.RetentionDuration = int64(time.Duration(a.Retention) / time.Millisecond)
+	if a.RetentionSize != "" {
+		maxBytes, err := units.ParseBase2Bytes(a.RetentionSize)
+		if err != nil {
+			return fmt.Errorf("parsing retention_size: %w", err)
+		}
+		tsdbOpts.MaxBytes = int64(maxBytes)
+	}
 	if a.WALCompression != nil && *a.WALCompression {
 		tsdbOpts.WALCompression = compression.Snappy
+	}
+	if a.OutOfOrderTimeWindow != 0 {
+		tsdbOpts.OutOfOrderTimeWindow = int64(time.Duration(a.OutOfOrderTimeWindow) / time.Millisecond)
 	}
 	dbStats := tsdb.NewDBStats()
 	a.db, err = tsdb.Open(a.DataDir, a.slogger, a.registry, tsdbOpts, dbStats)
@@ -183,6 +194,7 @@ func (a *App) Start() error {
 		TSDBRetentionDuration:     model.Duration(a.Retention),
 		EnableAdminAPI:            a.EnableAdmin,
 		EnableRemoteWriteReceiver: a.EnableRemoteWriteReceiver,
+		EnableOTLPWriteReceiver:   a.EnableOTLPWriteReceiver,
 		ListenAddresses:           []string{a.webAddr},
 		Gatherer:                  a.registry,
 		Registerer:                a.registry,

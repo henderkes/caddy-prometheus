@@ -20,8 +20,6 @@ import (
 	_ "github.com/prometheus/prometheus/discovery/install"
 )
 
-// AppConfig is the JSON/Caddyfile configuration for the prometheus app.
-// Fields without defaults are noted; everything else uses Prometheus defaults.
 type AppConfig struct {
 	ConfigFile                string         `json:"config_file,omitempty"` // path to prometheus.yml; mutually exclusive with inline config
 	DataDir                   string         `json:"data_dir,omitempty"`    // default: {caddy_data}/prometheus
@@ -35,6 +33,8 @@ type AppConfig struct {
 	QueryMaxSamples           int            `json:"query_max_samples,omitempty"`    // default: 50000000
 	QueryLookbackDelta        caddy.Duration `json:"query_lookback_delta,omitempty"` // default: 5m
 	EnableRemoteWriteReceiver bool           `json:"enable_remote_write_receiver,omitempty"`
+	EnableOTLPWriteReceiver   bool           `json:"enable_otlp_write_receiver,omitempty"`
+	OutOfOrderTimeWindow      caddy.Duration `json:"out_of_order_time_window,omitempty"` // default: 0 (disabled)
 
 	Global        *GlobalConfig       `json:"global,omitempty"`
 	ScrapeConfigs []ScrapeConfig      `json:"scrape_configs,omitempty"`
@@ -132,7 +132,7 @@ func (c *AppConfig) defaults() {
 	}
 }
 
-// loadPrometheusConfig loads from config_file or builds from inline (Caddyfile) config.
+// loads from config_file or builds from inline (Caddyfile) config.
 func (c *AppConfig) loadPrometheusConfig(logger *slog.Logger) (*promconfig.Config, error) {
 	if c.ConfigFile != "" {
 		return promconfig.LoadFile(c.ConfigFile, false, logger)

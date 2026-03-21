@@ -92,6 +92,19 @@ func parseGlobalOption(d *caddyfile.Dispenser, existingVal interface{}) (interfa
 			case "enable_remote_write_receiver":
 				app.EnableRemoteWriteReceiver = true
 
+			case "enable_otlp_write_receiver":
+				app.EnableOTLPWriteReceiver = true
+
+			case "out_of_order_time_window":
+				if !d.NextArg() {
+					return nil, d.ArgErr()
+				}
+				dur, err := caddy.ParseDuration(d.Val())
+				if err != nil {
+					return nil, d.Errf("parsing out_of_order_time_window: %v", err)
+				}
+				app.OutOfOrderTimeWindow = caddy.Duration(dur)
+
 			case "global":
 				g, err := parseGlobalBlock(d)
 				if err != nil {

@@ -5,8 +5,6 @@
 		metrics
 	}
 
-	frankenphp
-
 	prometheus {
 		data_dir /data/prometheus
 		listen :9090
