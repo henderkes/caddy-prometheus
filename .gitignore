@@ -28,7 +28,6 @@ go.work.sum
 .idea/
 # .vscode/
 
-caddy/static/
 integration/frankenphp
 frankenphp
 frankenphp.exe
